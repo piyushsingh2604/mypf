@@ -24,12 +24,11 @@ class ExpListWidget extends StatelessWidget {
       color: WebColors.expColor,
       child: ScrollLoopAutoScroll(
         scrollDirection: Axis.horizontal,
-        delay: const Duration(seconds: 1),
+        delay: const Duration(milliseconds: 100),
         gap: 20,
         reverseScroll: true,
         duplicateChild: 25,
-        enableScrollInput: true,
-        delayAfterScrollInput: const Duration(seconds: 10),
+        enableScrollInput: false,
         duration: const Duration(seconds: 150),
         child: Row(
           children: expList.map((data) {
