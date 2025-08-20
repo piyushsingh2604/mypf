@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mypf/utils/web_colors.dart';
 
 class RowButton extends StatefulWidget {
-  const RowButton({super.key});
+  final bool isMobile;
+  const RowButton({super.key, required this.isMobile});
 
   @override
   State<RowButton> createState() => _RowButtonState();
@@ -57,7 +58,7 @@ class _RowButtonState extends State<RowButton>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 30, left: 128),
+      padding: EdgeInsets.only(top: 30, left: widget.isMobile ? 0 : 128),
       child: SlideTransition(
         position: _slideAnimation,
         child: Row(
