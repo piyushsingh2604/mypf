@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class DashboardPage extends GetResponsiveView {
-  DashboardPage({Key? key}) : super(key: key);
+  DashboardPage({super.key});
 
   @override
   Widget phone() {

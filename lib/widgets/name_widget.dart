@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:mypf/add_user_info_mobile.dart';
+import 'package:mypf/add_user_info_web.dart';
 import 'package:mypf/utils/web_colors.dart';
 import 'package:mypf/widgets/exp_list_widget.dart';
 import 'package:mypf/widgets/row_button.dart';
 import 'package:pretty_animated_text/pretty_animated_text.dart';
 
 class NameWidget extends StatelessWidget {
-  const NameWidget({super.key});
+  final VoidCallback onGoToProjects;
+
+  const NameWidget({super.key, required this.onGoToProjects});
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +102,16 @@ class NameWidget extends StatelessWidget {
               ),
             ),
           ),
-          RowButton(isMobile: false),
+          RowButton(
+            isMobile: false,
+            addUserData: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddUserInfoWeb()),
+              );
+            },
+            autoScroller: onGoToProjects,
+          ),
         ],
       ),
     );
@@ -106,8 +119,9 @@ class NameWidget extends StatelessWidget {
 }
 
 class MobileNameWidget extends StatelessWidget {
-  const MobileNameWidget({super.key});
+  final VoidCallback onGoToProjects;
 
+  const MobileNameWidget({super.key, required this.onGoToProjects});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -201,7 +215,20 @@ class MobileNameWidget extends StatelessWidget {
           // Button row
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [RowButton(isMobile: true)],
+            children: [
+              RowButton(
+                isMobile: true,
+                addUserData: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddUserInfoMobile(),
+                    ),
+                  );
+                },
+                autoScroller: onGoToProjects,
+              ),
+            ],
           ),
           Container(width: double.infinity, height: 310, color: Colors.green),
           ExpListWidget(),

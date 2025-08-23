@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mypf/models/project_model.dart';
 import 'package:mypf/utils/web_colors.dart';
 import 'package:mypf/widgets/exp_list_widget.dart';
 import 'package:mypf/widgets/name_widget.dart';
 import 'package:mypf/widgets/total_work_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mypf/work_view.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -15,14 +18,18 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   List expData = [];
+
   RxBool isLoading = false.obs;
   late AnimationController _containerController;
   late AnimationController _aboutController;
+  List<ProjectModel> projectList = [];
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _projectsKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    getfirebaseData();
+    getAllData();
     _containerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -45,14 +52,41 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> getfirebaseData() async {
+  Future<void> getAllData() async {
     isLoading.value = true;
+
+    await getfirebaseData();
+    await getProjects();
+    isLoading.value = false;
+  }
+
+  Future<void> getfirebaseData() async {
     final response = await FirebaseFirestore.instance
         .collection('piyush_data')
         .get();
 
     expData = response.docs.map((doc) => doc.data()).toList();
-    isLoading.value = false;
+  }
+
+  Future<void> getProjects() async {
+    final response = await FirebaseFirestore.instance
+        .collection('project_data')
+        .get();
+
+    projectList = response.docs
+        .map((doc) => ProjectModel.fromJson(doc.data()))
+        .toList();
+  }
+
+  void _scrollToProjects() {
+    final context = _projectsKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -76,6 +110,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
             : Padding(
                 padding: const EdgeInsets.only(top: 25, bottom: 20, right: 20),
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -96,7 +131,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const NameWidget(),
+                          NameWidget(onGoToProjects: _scrollToProjects),
                           ScaleTransition(
                             scale: CurvedAnimation(
                               parent: _containerController,
@@ -115,6 +150,35 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                       ),
 
                       ExpListWidget(),
+                      Padding(
+                        key: _projectsKey,
+                        padding: const EdgeInsets.all(20),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return MasonryGridView.count(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: constraints.maxWidth > 1200
+                                  ? 3
+                                  : constraints.maxWidth > 800
+                                  ? 2
+                                  : 1,
+                              mainAxisSpacing: 20,
+                              crossAxisSpacing: 20,
+                              itemCount: projectList.length,
+                              itemBuilder: (context, index) {
+                                final data = projectList[index];
+                                return WhatsAppImageGrid(
+                                  images: data.images,
+                                  projectName: data.name,
+                                  chips: data.chips,
+                                  des: data.des,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
 
                       Padding(
                         padding: const EdgeInsets.only(

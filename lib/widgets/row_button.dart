@@ -3,7 +3,10 @@ import 'package:mypf/utils/web_colors.dart';
 
 class RowButton extends StatefulWidget {
   final bool isMobile;
-  const RowButton({super.key, required this.isMobile});
+  final VoidCallback autoScroller;
+  final VoidCallback addUserData;
+
+  const RowButton({super.key, required this.isMobile,required this.addUserData,required this.autoScroller});
 
   @override
   State<RowButton> createState() => _RowButtonState();
@@ -37,19 +40,22 @@ class _RowButtonState extends State<RowButton>
     super.dispose();
   }
 
-  Widget buildButton({required String text, required bool filled}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: filled ? WebColors.buttonColor : Colors.transparent,
-        border: Border.all(color: WebColors.buttonColor, width: 2),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: WebColors.textColor,
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
+  Widget buildButton({required String text, required bool filled,required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: filled ? WebColors.buttonColor : Colors.transparent,
+          border: Border.all(color: WebColors.buttonColor, width: 2),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: WebColors.textColor,
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
         ),
       ),
     );
@@ -63,9 +69,9 @@ class _RowButtonState extends State<RowButton>
         position: _slideAnimation,
         child: Row(
           children: [
-            buildButton(text: "Got a project?", filled: true),
+            buildButton(text: "Got a project?", filled: true, onTap: widget.addUserData),
             const SizedBox(width: 15),
-            buildButton(text: "Show projects", filled: false),
+            buildButton(text: "Show projects", filled: false, onTap: widget.autoScroller),
           ],
         ),
       ),
