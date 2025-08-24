@@ -230,7 +230,58 @@ class MobileNameWidget extends StatelessWidget {
               ),
             ],
           ),
-          Container(width: double.infinity, height: 310, color: Colors.green),
+          SizedBox(height: 9),
+          Stack(
+            children: [
+              // Image background
+              Container(
+                height: 310,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(
+                      'assets/WhatsApp Image 2025-08-24 at 8.10.11 PM.jpeg',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+
+              // Top gradient overlay - fades over 10% from top to bottom
+              Container(
+                height: 310,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF121F28),
+                      Colors.transparent, // fully transparent after 10%
+                    ],
+                    stops: [0.0, 0.1], // fade within 10% height
+                  ),
+                ),
+              ),
+
+              // Left gradient overlay - fades over 20% from left to right
+              Container(
+                height: 310,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xFF121F28).withOpacity(1.0), // strong dark on left
+                      Colors.transparent, // fully transparent after 20%
+                    ],
+                    stops: [0.0, 0.2], // fade within 20% width
+                  ),
+                ),
+              ),
+            ],
+          ),
           ExpListWidget(),
         ],
       ),
