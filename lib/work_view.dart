@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:mypf/models/project_model.dart';
 import 'package:mypf/utils/web_colors.dart';
 
@@ -41,7 +42,11 @@ class WhatsAppImageGrid extends StatelessWidget {
         Container(
           width: 250,
           padding: const EdgeInsets.only(
-              bottom: 15, left: 10, right: 10, top: 10),
+            bottom: 15,
+            left: 10,
+            right: 10,
+            top: 10,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: WebColors.buttonColor),
@@ -56,14 +61,13 @@ class WhatsAppImageGrid extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: displayCount,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 4,
                     mainAxisSpacing: 4,
                   ),
                   itemBuilder: (context, index) {
-                    final imageUrl = images[index].name; // ✅ FIX
+                    final imageUrl = images[index].name;
 
                     if (index == 3 && total > 4) {
                       return GestureDetector(
@@ -73,10 +77,7 @@ class WhatsAppImageGrid extends StatelessWidget {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                              ),
+                              child: Image.network(imageUrl, fit: BoxFit.cover),
                             ),
                             Container(
                               color: Colors.black45,
@@ -96,15 +97,11 @@ class WhatsAppImageGrid extends StatelessWidget {
                       );
                     }
 
-                    // Normal image
                     return GestureDetector(
                       onTap: () => _openGallery(context, index),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.network(imageUrl, fit: BoxFit.cover),
                       ),
                     );
                   },
@@ -115,17 +112,13 @@ class WhatsAppImageGrid extends StatelessWidget {
                 builder: (context, constraints) {
                   int count = constraints.maxWidth > 200 ? 2 : 1;
 
-                  return GridView.builder(
+                  return MasonryGridView.count(
+                    crossAxisCount: count,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: chips.length,
-                    gridDelegate:
-                        SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: count,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 8,
-                      childAspectRatio: 3,
-                    ),
                     itemBuilder: (context, index) {
                       return chip(text: chips[index].name);
                     },
@@ -153,7 +146,7 @@ class WhatsAppImageGrid extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => FullGallery(
-          images: images.map((e) => e.name).toList(), // ✅ FIX
+          images: images.map((e) => e.name).toList(),
           initialIndex: startIndex,
         ),
       ),
@@ -162,10 +155,10 @@ class WhatsAppImageGrid extends StatelessWidget {
 
   Widget chip({required String text}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: WebColors.buttonColor),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
@@ -174,6 +167,9 @@ class WhatsAppImageGrid extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
+        textAlign: TextAlign.center,
+        softWrap: true,
+        overflow: TextOverflow.visible,
       ),
     );
   }
@@ -214,13 +210,10 @@ class _FullGalleryState extends State<FullGallery> {
             itemCount: widget.images.length,
             itemBuilder: (context, index) {
               return InteractiveViewer(
-                child: Center(
-                  child: Image.network(widget.images[index]),
-                ),
+                child: Center(child: Image.network(widget.images[index])),
               );
             },
           ),
-          // Left button
           Positioned(
             left: 10,
             top: MediaQuery.of(context).size.height / 2 - 30,
@@ -236,7 +229,6 @@ class _FullGalleryState extends State<FullGallery> {
               },
             ),
           ),
-          // Right button
           Positioned(
             right: 10,
             top: MediaQuery.of(context).size.height / 2 - 30,
