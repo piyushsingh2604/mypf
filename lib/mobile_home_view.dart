@@ -103,25 +103,27 @@ class _MobileHomeViewState extends State<MobileHomeView> {
                           onGoToProjects: _scrollToProjects,
                         ),
                       ),
-                      ListView.builder(
-                        itemCount: projectList.length,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final data = projectList[index];
-                          return Padding(
-                            key: _projectsKey,
-                            padding: const EdgeInsets.only(top: 30),
-                            child: Center(
-                              child: WhatsAppImageGrid(
-                                images: data.images,
-                                projectName: data.name,
-                                chips: data.chips,
-                                des: data.des,
+                      Container(
+                        key: _projectsKey,
+                        child: ListView.builder(
+                          itemCount: projectList.length,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            final data = projectList[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 30),
+                              child: Center(
+                                child: WhatsAppImageGrid(
+                                  images: data.images,
+                                  projectName: data.name,
+                                  chips: data.chips,
+                                  des: data.des,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                       SizedBox(height: 90),
                       Center(
