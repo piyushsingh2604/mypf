@@ -273,7 +273,7 @@ class MobileNameWidget extends StatelessWidget {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Color(0xFF121F28).withOpacity(1.0), // strong dark on left
+                      Color(0xFF121F28).withValues(alpha: 1.0), // strong dark on left
                       Colors.transparent, // fully transparent after 20%
                     ],
                     stops: [0.0, 0.2], // fade within 20% width

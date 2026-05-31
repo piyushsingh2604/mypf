@@ -8,7 +8,11 @@ import 'package:mypf/utils/web_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (_) {
+    // Firebase not configured for this platform (e.g. mobile) — app runs with local data
+  }
   runApp(const MyApp());
 }
 
@@ -31,17 +35,11 @@ class DashboardPage extends GetResponsiveView {
   DashboardPage({super.key});
 
   @override
-  Widget phone() {
-    return MobileHomeView();
-  }
+  Widget phone() => MobileHomeView();
 
   @override
-  Widget tablet() {
-    return HomeView();
-  }
+  Widget tablet() => HomeView();
 
   @override
-  Widget desktop() {
-    return HomeView();
-  }
+  Widget desktop() => HomeView();
 }

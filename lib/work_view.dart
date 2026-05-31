@@ -19,125 +19,131 @@ class WhatsAppImageGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     int total = images.length;
     int displayCount = total > 4 ? 4 : total;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 250,
-          child: Text(
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        color: (isDark ? WebColors.cardDark : WebColors.cardLight)
+            .withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             projectName,
             style: TextStyle(
-              color: WebColors.textColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 21,
+              color: isDark ? WebColors.textPrimary : WebColors.textDark,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              letterSpacing: -0.3,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: 9),
-        Container(
-          width: 250,
-          padding: const EdgeInsets.only(
-            bottom: 15,
-            left: 10,
-            right: 10,
-            top: 10,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: WebColors.buttonColor),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 250,
-                width: 250,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: displayCount,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 4,
-                    mainAxisSpacing: 4,
-                  ),
-                  itemBuilder: (context, index) {
-                    final imageUrl = images[index].name;
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              height: 220,
+              width: double.infinity,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: displayCount,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 4,
+                ),
+                itemBuilder: (context, index) {
+                  final imageUrl = images[index].name;
 
-                    if (index == 3 && total > 4) {
-                      return GestureDetector(
-                        onTap: () => _openGallery(context, index),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(imageUrl, fit: BoxFit.cover),
+                  if (index == 3 && total > 4) {
+                    return GestureDetector(
+                      onTap: () => _openGallery(context, index),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
                             ),
-                            Container(
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
                               color: Colors.black45,
-                              child: Center(
-                                child: Text(
-                                  "+${total - 4}",
-                                  style: const TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "+${total - 4}",
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return GestureDetector(
-                      onTap: () => _openGallery(context, index),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(imageUrl, fit: BoxFit.cover),
+                          ),
+                        ],
                       ),
                     );
-                  },
-                ),
-              ),
-              const SizedBox(height: 15),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  int count = constraints.maxWidth > 200 ? 2 : 1;
+                  }
 
-                  return MasonryGridView.count(
-                    crossAxisCount: count,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: chips.length,
-                    itemBuilder: (context, index) {
-                      return chip(text: chips[index].name);
-                    },
+                  return GestureDetector(
+                    onTap: () => _openGallery(context, index),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(imageUrl, fit: BoxFit.cover),
+                    ),
                   );
                 },
               ),
-              const SizedBox(height: 9),
-              Text(
-                des,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                  color: Color.fromARGB(89, 255, 255, 255),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              int count = constraints.maxWidth > 200 ? 2 : 1;
+              return MasonryGridView.count(
+                crossAxisCount: count,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: chips.length,
+                itemBuilder: (context, index) {
+                  return _chip(text: chips[index].name);
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            des,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              fontWeight: FontWeight.w400,
+              color: (isDark ? WebColors.textSecondary : WebColors.textDarkSecondary)
+                  .withValues(alpha: 0.8),
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -153,23 +159,22 @@ class WhatsAppImageGrid extends StatelessWidget {
     );
   }
 
-  Widget chip({required String text}) {
+  Widget _chip({required String text}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        border: Border.all(color: WebColors.buttonColor),
+        color: WebColors.accent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: WebColors.textColor,
-          fontSize: 14,
+          color: WebColors.accent,
+          fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
         textAlign: TextAlign.center,
         softWrap: true,
-        overflow: TextOverflow.visible,
       ),
     );
   }
@@ -202,7 +207,7 @@ class _FullGalleryState extends State<FullGallery> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.black),
+      appBar: AppBar(backgroundColor: Colors.black, elevation: 0),
       body: Stack(
         children: [
           PageView.builder(

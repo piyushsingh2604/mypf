@@ -2,334 +2,255 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mypf/models/project_model.dart';
 import 'package:mypf/utils/web_colors.dart';
-import 'package:mypf/widgets/exp_list_widget.dart';
-import 'package:mypf/widgets/name_widget.dart';
-import 'package:mypf/widgets/total_work_widget.dart';
+import 'package:mypf/widgets/animated_bg.dart';
+import 'package:mypf/widgets/glass_nav.dart';
+import 'package:mypf/widgets/hero_section.dart';
+import 'package:mypf/widgets/skill_section.dart';
+import 'package:mypf/widgets/project_card.dart';
+import 'package:mypf/widgets/stat_card.dart';
+import 'package:mypf/widgets/contact_section.dart';
+import 'package:mypf/widgets/footer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mypf/work_view.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
-
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   List expData = [];
+  RxBool loading = false.obs;
+  List<ProjectModel> projects = [];
+  final _scroll = ScrollController();
+  String _active = "home";
 
-  RxBool isLoading = false.obs;
-  late AnimationController _containerController;
-  late AnimationController _aboutController;
-  List<ProjectModel> projectList = [];
-  final ScrollController _scrollController = ScrollController();
-  final GlobalKey _projectsKey = GlobalKey();
+  final Map<String, GlobalKey> _keys = {
+    "home": GlobalKey(), "skills": GlobalKey(),
+    "projects": GlobalKey(), "stats": GlobalKey(), "contact": GlobalKey(),
+  };
+
+  late AnimationController _bgAnim;
 
   @override
   void initState() {
     super.initState();
-    getAllData();
-    _containerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..forward();
-
-    _aboutController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) _aboutController.forward();
-    });
+    _bgAnim = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
+    _fetch();
+    _scroll.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _containerController.dispose();
-    _aboutController.dispose();
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    _bgAnim.dispose();
     super.dispose();
   }
 
-  Future<void> getAllData() async {
-    isLoading.value = true;
-
-    await getfirebaseData();
-    await getProjects();
-    isLoading.value = false;
-  }
-
-  Future<void> getfirebaseData() async {
-    final response = await FirebaseFirestore.instance
-        .collection('piyush_data')
-        .get();
-
-    expData = response.docs.map((doc) => doc.data()).toList();
-  }
-
-  Future<void> getProjects() async {
-    final response = await FirebaseFirestore.instance
-        .collection('project_data')
-        .get();
-
-    projectList = response.docs
-        .map((doc) => ProjectModel.fromJson(doc.data()))
-        .toList();
-  }
-
-  void _scrollToProjects() {
-    final context = _projectsKey.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(seconds: 1),
-        curve: Curves.easeInOut,
-      );
+  void _onScroll() {
+    double win = MediaQuery.of(context).size.height * 0.4;
+    String ns = "home";
+    for (final e in _keys.entries) {
+      final key = e.value.currentContext;
+      if (key != null) {
+        final box = key.findRenderObject() as RenderBox?;
+        if (box != null && box.localToGlobal(Offset.zero).dy < win) {
+          ns = e.key;
+        }
+      }
     }
+    if (ns != _active) setState(() => _active = ns);
+  }
+
+  Future<void> _fetch() async {
+    loading.value = true;
+    try {
+      var r = await FirebaseFirestore.instance.collection('piyush_data').get();
+      expData = r.docs.map((d) => d.data()).toList();
+      r = await FirebaseFirestore.instance.collection('project_data').get();
+      projects = r.docs.map((d) => ProjectModel.fromJson(d.data())).toList();
+    } catch (_) {
+      expData = [];
+      projects = [];
+    }
+    loading.value = false;
+  }
+
+  void _scrollTo(String s) {
+    final c = _keys[s]?.currentContext;
+    if (c != null) Scrollable.ensureVisible(c, duration: const Duration(seconds: 1), curve: Curves.easeInOut);
   }
 
   @override
   Widget build(BuildContext context) {
-    final double containerWidth = MediaQuery.of(context).size.width;
-    double getResponsiveWidth(double containerWidth) {
-      if (containerWidth > 1000) {
-        return 400;
-      } else if (containerWidth > 600) {
-        return 300;
-      } else {
-        return 100;
-      }
-    }
-
+    final w = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: WebColors.backroundColor,
-      body: Obx(
-        () => isLoading.value
-            ? Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.only(top: 25, bottom: 20, right: 20),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 130),
-                        child: Text(
-                          "Piyush Singh",
-                          style: TextStyle(
-                            color: WebColors.textColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          NameWidget(onGoToProjects: _scrollToProjects),
-                          ScaleTransition(
-                            scale: CurvedAnimation(
-                              parent: _containerController,
-                              curve: Curves.easeOutBack,
-                            ),
-                            child: FadeTransition(
-                              opacity: _containerController,
-                              child: Stack(
-                                children: [
-                                  // Image background
-                                  Container(
-                                    height: containerWidth > 750 ? 400 : 200,
-                                    width: containerWidth > 750 ? 400 : 200,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                          'assets/WhatsApp Image 2025-08-24 at 8.10.11 PM.jpeg',
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-
-                                  // Top gradient overlay - fades over 10% from top to bottom
-                                  Container(
-                                    height: containerWidth > 750 ? 400 : 200,
-                                    width: containerWidth > 750 ? 400 : 200,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFF121F28),
-                                          Colors
-                                              .transparent, // fully transparent after 10%
-                                        ],
-                                        stops: [
-                                          0.0,
-                                          0.1,
-                                        ], // fade within 10% height
-                                      ),
-                                    ),
-                                  ),
-
-                                  // Left gradient overlay - fades over 20% from left to right
-                                  Container(
-                                    height: containerWidth > 750 ? 400 : 200,
-                                    width: containerWidth > 750 ? 400 : 200,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                        colors: [
-                                          Color(0xFF121F28).withOpacity(
-                                            1.0,
-                                          ), // strong dark on left
-                                          Colors
-                                              .transparent, // fully transparent after 20%
-                                        ],
-                                        stops: [
-                                          0.0,
-                                          0.2,
-                                        ], // fade within 20% width
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      ExpListWidget(),
-                      Padding(
-                        key: _projectsKey,
-                        padding: const EdgeInsets.all(20),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return MasonryGridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: constraints.maxWidth > 1200
-                                  ? 3
-                                  : constraints.maxWidth > 800
-                                  ? 2
-                                  : 1,
-                              mainAxisSpacing: 20,
-                              crossAxisSpacing: 20,
-                              itemCount: projectList.length,
-                              itemBuilder: (context, index) {
-                                final data = projectList[index];
-                                return WhatsAppImageGrid(
-                                  images: data.images,
-                                  projectName: data.name,
-                                  chips: data.chips,
-                                  des: data.des,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 60,
-                          left: 128,
-                          right: 50,
-                        ),
-                        child: AnimatedBuilder(
-                          animation: _aboutController,
-                          builder: (context, child) {
-                            return Transform.translate(
-                              offset: Offset(
-                                0,
-                                50 * (1 - _aboutController.value),
-                              ),
-                              child: Opacity(
-                                opacity: _aboutController.value,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Image.asset(
-                                'assets/Slice 1(2).png',
-                                fit: BoxFit.cover,
-                                width: 200,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "About",
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.w700,
-                                      color: WebColors.textColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  SizedBox(
-                                    width: getResponsiveWidth(containerWidth),
-
-                                    child: Text(
-                                      "Hi, I'm Piyush Singh, a passionate Flutter developer with 3+ years "
-                                      "of experience in app development. I specialize in building clean, "
-                                      "responsive, and scalable applications using Flutter, Firebase, and REST APIs. "
-                                      "I enjoy turning creative ideas into real products, contributing to open source, "
-                                      "and constantly learning new tools to improve my craft.",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        height: 1.5,
-                                        color: WebColors.textColor.withOpacity(
-                                          0.9,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Wrap(
-                                    spacing: 40,
-                                    runSpacing: 40,
-                                    children: [
-                                      showAbout(
-                                        num: expData[0]['completed'],
-                                        title: "Completed",
-                                        subTitle: "Projects",
-                                        symbol: '+',
-                                      ),
-                                      showAbout(
-                                        num: expData[0]['happedClint'],
-                                        title: "Client",
-                                        subTitle: "satisfaction",
-                                        symbol: '%',
-                                      ),
-                                      showAbout(
-                                        num: expData[0]['totalYear'],
-                                        title: "Years of",
-                                        subTitle: "experience",
-                                        symbol: '+',
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+      body: Obx(() => loading.value
+          ? const Center(child: CircularProgressIndicator(color: WebColors.primary))
+          : Stack(
+              children: [
+                AnimatedBg(
+                  child: SingleChildScrollView(
+                    controller: _scroll,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 64),
+                        HeroSection(key: _keys["home"], onGoToProjects: () => _scrollTo("projects")),
+                        _divider(),
+                        SkillSection(key: _keys["skills"]),
+                        _divider(),
+                        _projects(w),
+                        _divider(),
+                        _stats(),
+                        _divider(),
+                        ContactSection(key: _keys["contact"]),
+                        const SizedBox(height: 40),
+                        Footer(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                Positioned(top: 0, left: 0, right: 0,
+                  child: GlassNav(active: _active, keys: _keys),
+                ),
+              ],
+            ),
       ),
+    );
+  }
+
+  Widget _divider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 48),
+      height: 1,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [WebColors.glass, WebColors.primary.withValues(alpha: 0.1), WebColors.glass],
+        ),
+      ),
+    );
+  }
+
+  Widget _projects(double w) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: _keys["projects"],
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 80),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _label("portfolio"),
+              const SizedBox(height: 12),
+              const Text("Featured Work",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: WebColors.text, letterSpacing: -0.5),
+              ),
+              const SizedBox(height: 8),
+              const Text("Projects that challenged and shaped me",
+                style: TextStyle(fontSize: 14, color: WebColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60),
+          child: LayoutBuilder(
+            builder: (context, c) {
+              return MasonryGridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: c.maxWidth > 1200 ? 3 : c.maxWidth > 800 ? 2 : 1,
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
+                itemCount: projects.length,
+itemBuilder: (context, i) {
+                  final d = projects[i];
+                  final dirs = [
+                    EdgeInsets.only(top: 80),
+                    EdgeInsets.only(left: 80),
+                    EdgeInsets.only(bottom: 80),
+                    EdgeInsets.only(right: 80),
+                    EdgeInsets.only(top: 60, left: 60),
+                    EdgeInsets.only(bottom: 60, right: 60),
+                  ];
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: Duration(milliseconds: 600 + i * 120),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, v, child) {
+                      final insets = dirs[i % dirs.length];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          top: insets.top * (1 - v),
+                          left: insets.left * (1 - v),
+                          bottom: insets.bottom * (1 - v),
+                          right: insets.right * (1 - v),
+                        ),
+                        child: Opacity(
+                          opacity: v,
+                          child: Transform.scale(
+                            scale: 0.85 + 0.15 * v,
+                            child: child,
+                          ),
+                        ),
+                      );
+                    },
+                    child: ProjectCard(
+                      images: d.images, projectName: d.name,
+                      chips: d.chips, des: d.des,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stats() {
+    return Container(
+      key: _keys["stats"],
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label("metrics"),
+          const SizedBox(height: 12),
+          const Text("By the Numbers",
+            style: TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: WebColors.text, letterSpacing: -0.5),
+          ),
+          const SizedBox(height: 32),
+          if (expData.isNotEmpty)
+            Wrap(
+              spacing: 24, runSpacing: 24,
+              children: [
+                StatCard(value: expData[0]['completed'] ?? '0', label: "Completed Projects", suffix: "+"),
+                StatCard(value: expData[0]['happedClint'] ?? '0', label: "Client Satisfaction", suffix: "%", color: WebColors.secondary),
+                StatCard(value: expData[0]['totalYear'] ?? '0', label: "Years Experience", suffix: "+", color: WebColors.tertiary),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _label(String t) {
+    return Row(
+      children: [
+        Container(width: 3, height: 20, color: WebColors.primary),
+        const SizedBox(width: 10),
+        Text(t, style: const TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w600, color: WebColors.primary, letterSpacing: 2,
+        )),
+      ],
     );
   }
 }
