@@ -1,50 +1,39 @@
 class ProjectModel {
   final String name;
   final String des;
-  final List<ImageModel> images;
-  final List<ChipModel> chips;
+  final List<String> chips;
+  final List<String> screenshots;
 
-  ProjectModel({
+  const ProjectModel({
     required this.name,
     required this.des,
     required this.chips,
-    required this.images,
+    this.screenshots = const [],
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    final rawChips = json['chips'] as List<dynamic>? ?? [];
+    final chips = rawChips.map((c) {
+      if (c is String) return c;
+      if (c is Map) return c['chips'] as String? ?? '';
+      return c.toString();
+    }).where((c) => c.isNotEmpty).toList();
+
+    final rawScreenshots = json['images'] as List<dynamic>? ?? [];
+    final screenshots = rawScreenshots
+        .map((s) {
+          if (s is String) return s;
+          if (s is Map) return s['images'] as String? ?? '';
+          return s.toString();
+        })
+        .where((s) => s.isNotEmpty)
+        .toList();
+
     return ProjectModel(
-      name: json['projectName'] ?? '',
-      des: json['des'] ?? '',
-      chips:
-          (json['chips'] as List<dynamic>?)
-              ?.map((chip) => ChipModel.fromJson(chip))
-              .toList() ??
-          [],
-      images:
-          (json['images'] as List<dynamic>?)
-              ?.map((img) => ImageModel.fromJson(img))
-              .toList() ??
-          [],
+      name: json['projectName'] as String? ?? '',
+      des: json['des'] as String? ?? '',
+      chips: chips,
+      screenshots: screenshots,
     );
-  }
-}
-
-class ImageModel {
-  final String name;
-
-  ImageModel({required this.name});
-
-  factory ImageModel.fromJson(Map<String, dynamic> json) {
-    return ImageModel(name: json['images'] ?? '');
-  }
-}
-
-class ChipModel {
-  final String name;
-
-  ChipModel({required this.name});
-
-  factory ChipModel.fromJson(Map<String, dynamic> json) {
-    return ChipModel(name: json['chips'] ?? '');
   }
 }
