@@ -28,20 +28,26 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     final hasImages = project.screenshots.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.smokyBlack,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.eerieBlack2,
+        backgroundColor: AppColors.cardBg,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.white2),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           project.name,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.dmSans(
             fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: AppColors.white2,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: AppColors.border),
         ),
       ),
       body: SingleChildScrollView(
@@ -59,7 +65,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       itemCount: project.screenshots.length,
                       itemBuilder: (context, index) {
                         return Container(
-                          color: AppColors.eerieBlack1,
+                          color: AppColors.backgroundAlt,
                           child: Image.network(
                             project.screenshots[index],
                             fit: BoxFit.contain,
@@ -67,10 +73,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                             errorBuilder: (_, __, ___) => _imagePlaceholder(),
                             loadingBuilder: (_, child, progress) {
                               if (progress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.orangeYellowCrayola,
-                                ),
+                              return const Center(
+                                child: CircularProgressIndicator(color: AppColors.accent),
                               );
                             },
                           ),
@@ -94,8 +98,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(4),
                                 color: _currentImage == i
-                                    ? AppColors.orangeYellowCrayola
-                                    : AppColors.lightGray70,
+                                    ? AppColors.accent
+                                    : AppColors.textLight,
                               ),
                             ),
                           ),
@@ -107,61 +111,66 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             ] else
               Container(
                 height: 200,
-                color: AppColors.eerieBlack1,
+                color: AppColors.backgroundAlt,
                 child: _imagePlaceholder(),
               ),
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.white2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: project.chips.map((c) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.orangeYellowCrayola.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        c,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppColors.orangeYellowCrayola,
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        project.name,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                    )).toList(),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: project.chips.map((c) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentLight,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            c,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.accent,
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'About this project',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        project.des,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 15,
+                          color: AppColors.textSecondary,
+                          height: 1.7,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "About",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    project.des,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      color: AppColors.lightGray,
-                      height: 1.7,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -172,10 +181,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
 
   Widget _imagePlaceholder() {
     return Center(
-      child: Icon(
-        Icons.folder_outlined,
-        size: 64,
-        color: AppColors.orangeYellowCrayola.withValues(alpha: 0.4),
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: AppColors.accentLight,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Center(
+          child: Icon(Icons.phone_android, size: 36, color: AppColors.accent),
+        ),
       ),
     );
   }

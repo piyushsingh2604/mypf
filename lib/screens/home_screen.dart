@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
-import '../widgets/sidebar.dart';
+import '../widgets/navbar.dart';
+import '../widgets/footer.dart';
+import '../sections/hero_section.dart';
+import '../sections/services_section.dart';
+import '../sections/tech_stack_section.dart';
+import '../sections/portfolio_section.dart';
 import '../sections/about_section.dart';
 import '../sections/resume_section.dart';
-import '../sections/portfolio_section.dart';
 import '../sections/blog_section.dart';
+import '../sections/faq_section.dart';
 import '../sections/contact_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,196 +20,103 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentPage = 0;
+  late final ScrollController _scrollController;
 
-  final List<_PageConfig> _pages = const [
-    _PageConfig("About", Icons.person_outline),
-    _PageConfig("Resume", Icons.book_outlined),
-    _PageConfig("Portfolio", Icons.folder_outlined),
-    _PageConfig("Blog", Icons.article_outlined),
-    _PageConfig("Contact", Icons.mail_outline),
+  // Section keys for smooth scrolling
+  final _homeKey = GlobalKey();
+  final _servicesKey = GlobalKey();
+  final _workKey = GlobalKey();
+  final _aboutKey = GlobalKey();
+  final _faqKey = GlobalKey();
+  final _contactKey = GlobalKey();
+
+  List<GlobalKey> get _sectionKeys => [
+    _homeKey,
+    _servicesKey,
+    _workKey,
+    _aboutKey,
+    _faqKey,
+    _contactKey,
+  ];
+
+  static const _sectionLabels = [
+    'Home',
+    'Services',
+    'Work',
+    'About',
+    'FAQ',
+    'Contact',
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToContact() {
+    final key = _contactKey;
+    if (key.currentContext != null) {
+      Scrollable.ensureVisible(
+        key.currentContext!,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 1024;
-
     return Scaffold(
-      body: SafeArea(
-        child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
-      ),
-    );
-  }
-
-  Widget _buildDesktopLayout() {
-    return Container(
-      decoration: const BoxDecoration(color: AppColors.smokyBlack),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 60),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Sidebar(),
-              const SizedBox(width: 25),
-              Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 500),
-                  decoration: BoxDecoration(
-                    color: AppColors.eerieBlack2,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.jet),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 40,
-                        offset: const Offset(0, 24),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildNavBar(),
-                      Expanded(
-                        child: _buildPageContent(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return Container(
-      decoration: const BoxDecoration(color: AppColors.smokyBlack),
-      child: Column(
+      backgroundColor: AppColors.background,
+      body: Stack(
         children: [
-          const Sidebar(),
-          const SizedBox(height: 15),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.eerieBlack2,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.jet),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 24,
-                    offset: const Offset(0, 16),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildNavBar(),
-                  Expanded(
-                    child: _buildPageContent(),
-                  ),
-                ],
-              ),
+          // Main scrollable content
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              children: [
+                // Extra top padding for navbar
+                const SizedBox(height: 64),
+
+                // Sections
+                _keyed(_homeKey, HeroSection(onContactTap: _scrollToContact)),
+                _keyed(_servicesKey, const ServicesSection()),
+                const TechStackSection(),
+                _keyed(_workKey, const PortfolioSection()),
+                _keyed(_aboutKey, const AboutSection()),
+                const ResumeSection(),
+                const BlogSection(),
+                _keyed(_faqKey, const FaqSection()),
+                _keyed(_contactKey, const ContactSection()),
+                const Footer(),
+              ],
             ),
           ),
-          const SizedBox(height: 75),
+
+          // Sticky Navbar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Navbar(
+              scrollController: _scrollController,
+              sectionKeys: _sectionKeys,
+              sectionLabels: _sectionLabels,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNavBar() {
-    final isWide = MediaQuery.of(context).size.width > 580;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.onyx.withValues(alpha: 0.75),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        border: Border.all(color: AppColors.jet),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            children: List.generate(_pages.length, (i) {
-              final isActive = _currentPage == i;
-              return GestureDetector(
-                onTap: () => setState(() => _currentPage = i),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isWide ? 16 : 10,
-                    vertical: 20,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _pages[i].icon,
-                        size: 14,
-                        color: isActive ? AppColors.orangeYellowCrayola : AppColors.lightGray,
-                      ),
-                      if (isWide) ...[
-                        const SizedBox(width: 6),
-                        Text(
-                          _pages[i].label,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                            color: isActive ? AppColors.orangeYellowCrayola : AppColors.lightGray,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
+  Widget _keyed(GlobalKey key, Widget child) {
+    return Container(key: key, child: child);
   }
-
-  Widget _buildPageContent() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: Padding(
-        key: ValueKey(_currentPage),
-        padding: const EdgeInsets.all(15),
-        child: _buildCurrentPage(),
-      ),
-    );
-  }
-
-  Widget _buildCurrentPage() {
-    switch (_currentPage) {
-      case 0:
-        return const AboutSection();
-      case 1:
-        return const ResumeSection();
-      case 2:
-        return const PortfolioSection();
-      case 3:
-        return const BlogSection();
-      case 4:
-        return const ContactSection();
-      default:
-        return const AboutSection();
-    }
-  }
-}
-
-class _PageConfig {
-  final String label;
-  final IconData icon;
-  const _PageConfig(this.label, this.icon);
 }

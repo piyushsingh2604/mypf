@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../models/resume_data.dart';
+import '../widgets/section_heading.dart';
 
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
@@ -9,140 +10,129 @@ class AboutSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = ResumeData.piyush;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth > 768;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionHeader("About me"),
-          const SizedBox(height: 15),
-          _aboutText(data),
-          const SizedBox(height: 35),
-          _serviceSection(data, isWide),
-          const SizedBox(height: 35),
-          _testimonialsSection(data),
-        ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+      color: AppColors.backgroundAlt,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            children: [
+              const SectionHeading(
+                label: 'ABOUT',
+                title: 'Know me better',
+                subtitle: 'A passionate Flutter developer building real-world apps since college.',
+              ),
+              const SizedBox(height: 48),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isDesktop = constraints.maxWidth > 800;
+                  if (isDesktop) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 3, child: _aboutText(data)),
+                        const SizedBox(width: 48),
+                        Expanded(flex: 2, child: _statsColumn(data)),
+                      ],
+                    );
+                  }
+                  return Column(
+                    children: [
+                      _aboutText(data),
+                      const SizedBox(height: 32),
+                      _statsColumn(data),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 48),
+              _experienceTimeline(data),
+            ],
+          ),
+        ),
       ),
-    );
-  }
-
-  Widget _sectionHeader(String title) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.w500,
-            color: AppColors.white2,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Container(
-          width: 30,
-          height: 3,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(3),
-            gradient: LinearGradient(colors: AppColors.goldGradient),
-          ),
-        ),
-      ],
     );
   }
 
   Widget _aboutText(ResumeData data) {
-    return Text(
-      "${data.about1}\n\n${data.about2}",
-      style: GoogleFonts.poppins(
-        fontSize: 14,
-        fontWeight: FontWeight.w300,
-        color: AppColors.lightGray,
-        height: 1.6,
-      ),
-    );
-  }
-
-  Widget _serviceSection(ResumeData data, bool isWide) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "What i'm doing",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: AppColors.white2,
+          data.about1,
+          style: GoogleFonts.dmSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+            height: 1.7,
           ),
         ),
-        const SizedBox(height: 20),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isWide ? 2 : 1,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: isWide ? 2.0 : 2.5,
+        const SizedBox(height: 16),
+        Text(
+          data.about2,
+          style: GoogleFonts.dmSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+            height: 1.7,
           ),
-          itemCount: data.services.length,
-          itemBuilder: (context, index) {
-            return _serviceCard(data.services[index]);
-          },
         ),
       ],
     );
   }
 
-  Widget _serviceCard(ServiceItem service) {
+  Widget _statsColumn(ResumeData data) {
+    return Column(
+      children: [
+        _statCard('1.5+', 'Years Experience'),
+        const SizedBox(height: 16),
+        _statCard('3+', 'Apps Published'),
+        const SizedBox(height: 16),
+        _statCard('2', 'Companies'),
+        const SizedBox(height: 16),
+        _statCard('11', 'Languages Supported'),
+      ],
+    );
+  }
+
+  Widget _statCard(String value, String label) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [AppColors.gradientOnyxLight, AppColors.gradientOnyxDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 16),
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          Icon(service.icon, color: AppColors.orangeYellowCrayola, size: 40),
-          const SizedBox(width: 18),
-          Flexible(
-            fit: FlexFit.loose,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  service.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.white2,
-                  ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  service.description,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w300,
-                    color: AppColors.lightGray,
-                    height: 1.5,
-                  ),
-                ),
-              ],
+          Text(
+            value,
+            style: GoogleFonts.dmSans(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.dmSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -150,50 +140,39 @@ class AboutSection extends StatelessWidget {
     );
   }
 
-  Widget _testimonialsSection(ResumeData data) {
+  Widget _experienceTimeline(ResumeData data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Testimonials",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: AppColors.white2,
+        Center(
+          child: Text(
+            'Experience',
+            style: GoogleFonts.dmSans(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: data.testimonials.length,
-            itemBuilder: (context, index) {
-              return _testimonialCard(data.testimonials[index]);
-            },
-          ),
-        ),
+        const SizedBox(height: 32),
+        ...data.experience.map((exp) => _timelineCard(exp)),
       ],
     );
   }
 
-  Widget _testimonialCard(Testimonial testimonial) {
+  Widget _timelineCard(Experience exp) {
     return Container(
-      width: 320,
-      margin: const EdgeInsets.only(right: 15),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [AppColors.gradientOnyxLight, AppColors.gradientOnyxDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 16),
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -203,58 +182,55 @@ class AboutSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.orangeYellowCrayola.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.accentLight,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: Center(
-                  child: Text(
-                    testimonial.name[0],
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.orangeYellowCrayola,
-                    ),
+                child: Text(
+                  exp.period,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accent,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    testimonial.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white2,
-                    ),
-                  ),
-                  Text(
-                    testimonial.role,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: AppColors.lightGray70,
-                    ),
-                  ),
-                ],
+              const Spacer(),
+              Text(
+                exp.location,
+                style: GoogleFonts.dmSans(
+                  fontSize: 12,
+                  color: AppColors.textLight,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: Text(
-              testimonial.text,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w300,
-                color: AppColors.lightGray,
-                height: 1.5,
-              ),
-              maxLines: 6,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            exp.role,
+            style: GoogleFonts.dmSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            exp.company,
+            style: GoogleFonts.dmSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            exp.description,
+            style: GoogleFonts.dmSans(
+              fontSize: 14,
+              color: AppColors.textMuted,
+              height: 1.6,
             ),
           ),
         ],

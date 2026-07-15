@@ -5,38 +5,41 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.smokyBlack,
-      fontFamily: GoogleFonts.poppins().fontFamily,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.orangeYellowCrayola,
-        secondary: AppColors.vegasGold,
-        surface: AppColors.eerieBlack2,
-        onSurface: AppColors.white2,
-        onPrimary: AppColors.smokyBlack,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.background,
+      fontFamily: GoogleFonts.dmSans().fontFamily,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.accent,
+        secondary: AppColors.accentHover,
+        surface: AppColors.cardBg,
+        onSurface: AppColors.textPrimary,
+        onPrimary: AppColors.textOnAccent,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(
+      textTheme: GoogleFonts.dmSansTextTheme(
         const TextTheme(
-          displayLarge: TextStyle(color: AppColors.white2),
-          displayMedium: TextStyle(color: AppColors.white2),
-          displaySmall: TextStyle(color: AppColors.white2),
-          headlineLarge: TextStyle(color: AppColors.white2),
-          headlineMedium: TextStyle(color: AppColors.white2),
-          headlineSmall: TextStyle(color: AppColors.white2),
-          titleLarge: TextStyle(color: AppColors.white2),
-          titleMedium: TextStyle(color: AppColors.white2),
-          titleSmall: TextStyle(color: AppColors.white2),
-          bodyLarge: TextStyle(color: AppColors.lightGray),
-          bodyMedium: TextStyle(color: AppColors.lightGray),
-          bodySmall: TextStyle(color: AppColors.lightGray70),
-          labelLarge: TextStyle(color: AppColors.white2),
-          labelMedium: TextStyle(color: AppColors.lightGray70),
-          labelSmall: TextStyle(color: AppColors.lightGray70),
+          displayLarge: TextStyle(color: AppColors.textPrimary),
+          displayMedium: TextStyle(color: AppColors.textPrimary),
+          displaySmall: TextStyle(color: AppColors.textPrimary),
+          headlineLarge: TextStyle(color: AppColors.textPrimary),
+          headlineMedium: TextStyle(color: AppColors.textPrimary),
+          headlineSmall: TextStyle(color: AppColors.textPrimary),
+          titleLarge: TextStyle(color: AppColors.textPrimary),
+          titleMedium: TextStyle(color: AppColors.textPrimary),
+          titleSmall: TextStyle(color: AppColors.textPrimary),
+          bodyLarge: TextStyle(color: AppColors.textSecondary),
+          bodyMedium: TextStyle(color: AppColors.textSecondary),
+          bodySmall: TextStyle(color: AppColors.textMuted),
+          labelLarge: TextStyle(color: AppColors.textPrimary),
+          labelMedium: TextStyle(color: AppColors.textMuted),
+          labelSmall: TextStyle(color: AppColors.textMuted),
         ),
       ),
     );
   }
+
+  // Keep darkTheme for backward compatibility
+  static ThemeData get darkTheme => lightTheme;
 }
